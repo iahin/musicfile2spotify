@@ -6,9 +6,9 @@ import numpy as np
 
 class SpotifyApi:
     def __init__(self) -> None:
-        self.CLIENT_ID = ""  # ADD client id
-        self.CLIENT_SECRET = ""  # Add Client secret id
-        self.REDIRECT_URL = "http://localhost:8080/callback/"
+        self.CLIENT_ID = "788b5ba035d7467bb89f59fc7edafdfa"
+        self.CLIENT_SECRET = "f50b52af039040dba585d352ec62fb3c"
+        self.REDIRECT_URL = "http://localhost:8888/callback/"
         self.SCOPE = 'playlist-modify-public'
         self.api = None
 
@@ -20,15 +20,24 @@ class SpotifyApi:
                 redirect_uri=self.REDIRECT_URL,
                 scope=self.SCOPE))
 
-    def search(self, musicnamelist) -> str:
+    def search(self, textfilename, musicnamelist) -> str:
+        print("Searching for songs and retriveng song URI...")
         urilist = []
-        for musicname in musicnamelist:
-            result = self.api.search(musicname, type="track", limit=1)
-            if result:
-                result = result['tracks']['items']
-                for item in result:
-                    uri = item['uri']
-                    urilist.append(uri)
+        songsnotfound = []
+        for musicname in tqdm(musicnamelist):
+            try:
+                result = self.api.search(musicname, type="track", limit=1)
+                if result:
+                    result = result['tracks']['items']
+                    for item in result:
+                        uri = item['uri']
+                        urilist.append(uri)
+            except:
+                songsnotfound.append(musicname)
+
+        with open(textfilename, "w") as output:
+            output.write(str(songsnotfound))
+
         return urilist
 
     def addtoplaylist(self, playlistname, trackidlist):
@@ -67,16 +76,13 @@ class SpotifyApi:
         return musicfound
 
     def processplaylist(self, playlistname, urilist):
+        print("Adding to playlist...")
         # Check if playlist already exist
         playlistURI = self.getplaylist_uri(playlistname)
         if not playlistURI:
             self.createPlaylist(playlistname)
             playlistURI = self.getplaylist_uri(playlistname)
 
-        if len(urilist) > 100:
-            total_minimal_chunks = int(len(urilist)/100)
-            chunks = np.array_split(urilist, total_minimal_chunks)
-            for chunk in chunks:
-                self.addtoplaylist(playlistURI, chunk)
-        else:
-            self.addtoplaylist(playlistURI, urilist)
+        while urilist:
+            self.addtoplaylist(playlistURI, urilist[:100])
+            urilist = urilist[100:]

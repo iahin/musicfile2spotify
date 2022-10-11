@@ -10,6 +10,7 @@ class FileHandle:
         self.musicnamelist = []
 
     def getmusiclist(self) -> list:
+        print("Getting song list...")
         for datafiles in self.pathlist:
             self.musicnamelist.append(Path(datafiles).stem)
         return self.musicnamelist

@@ -6,8 +6,8 @@ import numpy as np
 
 class SpotifyApi:
     def __init__(self) -> None:
-        self.CLIENT_ID = "788b5ba035d7467bb89f59fc7edafdfa"
-        self.CLIENT_SECRET = "f50b52af039040dba585d352ec62fb3c"
+        self.CLIENT_ID = ""
+        self.CLIENT_SECRET = ""
         self.REDIRECT_URL = "http://localhost:8888/callback/"
         self.SCOPE = 'playlist-modify-public'
         self.api = None
